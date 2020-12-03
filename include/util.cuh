@@ -16,21 +16,24 @@ display(size_t arraySize, ...)
     
     std::array<T*, numArrays> hArrays;
     
-    for(int i=0; i<numArrays; i++){
-        hArrays[i] = (T*)malloc(sizeof(T) * arraySize);
-        cudaMemcpy(hArrays[i], va_arg(params, T*), sizeof(T) * arraySize, cudaMemcpyDeviceToHost);
+    for(auto &array:hArrays){
+        array = (T*)malloc(sizeof(T) * arraySize);
+        cudaMemcpy(array, va_arg(params, T*), sizeof(T) * arraySize, cudaMemcpyDeviceToHost);
     }
     
     va_end(params);
     
-    for(size_t j = 0; j < arraySize; j++){
-        for (size_t i = 0; i < numArrays; ++i) {
-            std::cout<< hArrays[i][j] << "\t";
-        }                
+    auto PrintSameIndex = [hArrays](size_t index){
+        for(auto &array:hArrays){
+            std::cout<< array[index] << "\t";
+        }   
         std::cout << std::endl;
-    }
+    };
     
-    for(int j = 0; j < numArrays; j++)
-        free(hArrays[j]);
+    for(size_t i=0; i<arraySize; ++i)
+        PrintSameIndex(i); 
+    
+    for(auto &array:hArrays)
+        free(array);
 }
 #endif
